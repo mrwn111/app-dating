@@ -1,7 +1,10 @@
-FROM php:8.2-apache
-RUN docker-php-ext-install pdo pdo_mysql mysqli
-RUN a2enmod rewrite
-COPY . /var/www/html/
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html
-EXPOSE 80
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["flask", "run", "--host=0.0.0.0"]
