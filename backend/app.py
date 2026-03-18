@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, render_template
 from flask_login import LoginManager
 from flask_cors import CORS
 from config import DevelopmentConfig
@@ -9,7 +9,9 @@ from models import db, User
 load_dotenv()
 
 def create_app(config_name='development'):
-    app = Flask(__name__)
+    app = Flask(__name__,
+                template_folder='../frontend/templates',
+                static_folder='../frontend/static')
 
     if config_name == 'development':
         app.config.from_object(DevelopmentConfig)
@@ -36,10 +38,10 @@ def create_app(config_name='development'):
     def health():
         return jsonify({'status': 'OK', 'message': 'Backend is running!'}), 200
 
-    @app.route('/index/', methods=['GET'])
+    @app.route('/', methods=['GET'])
+    @app.route('/index', methods=['GET'])
     def index():
-        frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend')
-        return send_from_directory(frontend_dir, 'index.html')
+        return render_template('index.html')
 
     from routes.auth import auth_bp
     from routes.profile import profile_bp
