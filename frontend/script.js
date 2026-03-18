@@ -1,96 +1,163 @@
-// ─── DATA ────────────────────────────────────────────────────────────────────
-const profiles = [
-  {
-    id: 1,
-    name: "Léa",
-    age: 25,
-    desc: "Photographe le weekend, dev la semaine. Amateur de ramen et de films noirs.",
-    tags: ["Photographie", "Tech", "Cinéma"],
-    color: "#2a1a2e",
-    emoji: "🎞️"
-  },
-  {
-    id: 2,
-    name: "Noah",
-    age: 28,
-    desc: "Cuisinier amateur obsédé par la fermentation. Je pars en randonnée tous les mois.",
-    tags: ["Cuisine", "Nature", "Voyage"],
-    color: "#1a2a1e",
-    emoji: "🏔️"
-  },
-  {
-    id: 3,
-    name: "Camille",
-    age: 23,
-    desc: "Illustratrice freelance. Mon chat s'appelle Bézier. J'aime les vieux vinyles.",
-    tags: ["Art", "Musique", "Design"],
-    color: "#2a1e18",
-    emoji: "🎨"
-  },
-  {
-    id: 4,
-    name: "Axel",
-    age: 30,
-    desc: "Architecte dans le civil, DJ le week-end. Paris / Berlin en alternance.",
-    tags: ["Architecture", "Électro", "Nuit"],
-    color: "#18202a",
-    emoji: "🏙️"
-  },
-  {
-    id: 5,
-    name: "Inès",
-    age: 26,
-    desc: "Chercheuse en biologie marine. Je plonge, je lis, je cuisine des fruits de mer.",
-    tags: ["Science", "Mer", "Lecture"],
-    color: "#162228",
-    emoji: "🐠"
-  },
-  {
-    id: 6,
-    name: "Tom",
-    age: 27,
-    desc: "Scénariste en herbe. En ce moment sur un road-trip pour m'inspirer.",
-    tags: ["Écriture", "Cinéma", "Road-trip"],
-    color: "#221820",
-    emoji: "✍️"
-  },
+// ─── STORAGE HELPERS ─────────────────────────────────────────────────────────
+// Simule une "base de données" partagée via localStorage
+// En production, ce serait remplacé par un vrai backend/API.
+
+const DB_USERS_KEY   = 'spark_users';    // tableau de tous les comptes
+const DB_SESSION_KEY = 'spark_session';  // email de l'utilisateur connecté
+const DB_STATE_KEY   = 'spark_state_';   // préfixe + email pour l'état perso
+
+const CARD_COLORS = [
+  "#2a1a2e","#1a2a1e","#2a1e18","#18202a","#162228","#221820",
+  "#2a2218","#1e1a2a","#182a22","#28181e","#1a2228","#201e18"
 ];
+const CARD_EMOJIS = ["🎞️","🏔️","🎨","🏙️","🐠","✍️","🎸","🌿","🎭","🚀","🌊","🦋"];
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
-const STATE_KEY = 'spark_state';
-
-function loadState() {
+function dbGetUsers() {
+  try { return JSON.parse(localStorage.getItem(DB_USERS_KEY)) || []; }
+  catch(e) { return []; }
+}
+function dbSaveUsers(users) {
+  localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
+}
+function dbGetSession() {
+  return localStorage.getItem(DB_SESSION_KEY) || null;
+}
+function dbSetSession(email) {
+  if (email) localStorage.setItem(DB_SESSION_KEY, email);
+  else localStorage.removeItem(DB_SESSION_KEY);
+}
+function dbGetState(email) {
   try {
-    const saved = localStorage.getItem(STATE_KEY);
+    const saved = JSON.parse(localStorage.getItem(DB_STATE_KEY + email));
     if (!saved) return null;
-    const s = JSON.parse(saved);
     const today = new Date().toDateString();
-    if (s.date !== today) {
-      s.notesLeft = 4;
-      s.date = today;
-      saveState(s);
+    if (saved.date !== today) {
+      saved.notesLeft = 4;
+      saved.date = today;
+      saved.deckIndex = 0;
+      dbSaveState(email, saved);
     }
-    return s;
-  } catch (e) { return null; }
+    return saved;
+  } catch(e) { return null; }
+}
+function dbSaveState(email, s) {
+  localStorage.setItem(DB_STATE_KEY + email, JSON.stringify(s));
 }
 
-function saveState(s) {
-  localStorage.setItem(STATE_KEY, JSON.stringify(s));
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+let currentUser = null;
+
+function switchTab(tab) {
+  document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('registerError').textContent = '';
 }
 
-const today = new Date().toDateString();
-let state = loadState() || {
-  date: today,
-  notesLeft: 4,
-  deckIndex: 0,
-  sentNotes: [],
-};
+function showError(id, msg) {
+  document.getElementById(id).textContent = msg;
+}
 
-let deck = [...profiles].slice(state.deckIndex);
-let isDragging = false;
-let startX = 0, currentX = 0;
-let activeCard = null;
-let topCardProfile = null;
+function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!email || !password) return showError('loginError', 'Remplis tous les champs.');
+
+  const users = dbGetUsers();
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) return showError('loginError', 'Email ou mot de passe incorrect.');
+
+  dbSetSession(email);
+  startApp(user);
+}
+
+function doRegister() {
+  const name     = document.getElementById('regName').value.trim();
+  const age      = parseInt(document.getElementById('regAge').value);
+  const desc     = document.getElementById('regDesc').value.trim();
+  const tagsRaw  = document.getElementById('regTags').value.trim();
+  const email    = document.getElementById('regEmail').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+
+  if (!name || !age || !desc || !email || !password)
+    return showError('registerError', 'Remplis tous les champs.');
+  if (age < 18 || age > 99)
+    return showError('registerError', "L'âge doit être entre 18 et 99 ans.");
+  if (password.length < 6)
+    return showError('registerError', 'Le mot de passe doit faire au moins 6 caractères.');
+
+  const users = dbGetUsers();
+  if (users.find(u => u.email === email))
+    return showError('registerError', 'Cet email est déjà utilisé.');
+
+  const tags = tagsRaw
+    ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean).slice(0, 5)
+    : [];
+
+  const colorIdx = users.length % CARD_COLORS.length;
+  const emojiIdx = users.length % CARD_EMOJIS.length;
+
+  const newUser = {
+    id: Date.now(),
+    name,
+    age,
+    desc,
+    tags,
+    email,
+    password,
+    color: CARD_COLORS[colorIdx],
+    emoji: CARD_EMOJIS[emojiIdx],
+  };
+
+  users.push(newUser);
+  dbSaveUsers(users);
+  dbSetSession(email);
+  startApp(newUser);
+  showToast(`Bienvenue ${name} ! 🎉`, 'success');
+}
+
+function doLogout() {
+  dbSetSession(null);
+  currentUser = null;
+  deck = [];
+  document.getElementById('appScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  switchTab('login');
+}
+
+function startApp(user) {
+  currentUser = user;
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+
+  // Init state
+  const today = new Date().toDateString();
+  state = dbGetState(user.email) || {
+    date: today,
+    notesLeft: 4,
+    deckIndex: 0,
+    sentNotes: [],
+  };
+
+  buildDeck();
+  renderDeck();
+}
+
+// ─── DECK ─────────────────────────────────────────────────────────────────────
+let deck = [];
+let state = {};
+
+function buildDeck() {
+  const users = dbGetUsers();
+  // Exclure le profil de l'utilisateur connecté
+  const others = users.filter(u => u.email !== currentUser.email);
+  deck = others.slice(state.deckIndex);
+}
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
 function buildCard(profile) {
@@ -120,16 +187,33 @@ function buildCard(profile) {
 
 function renderDeck() {
   const stack = document.getElementById('stack');
-  stack.innerHTML = '';
+  const emptyEl = document.getElementById('emptyState');
+  const noUsersEl = document.getElementById('noUsersState');
+  const actionsEl = document.getElementById('actions');
 
-  if (deck.length === 0) {
-    document.getElementById('emptyState').classList.add('show');
-    document.getElementById('actions').style.opacity = '0.3';
-    document.getElementById('actions').style.pointerEvents = 'none';
+  stack.innerHTML = '';
+  emptyEl.classList.remove('show');
+  noUsersEl.classList.remove('show');
+
+  const users = dbGetUsers().filter(u => u.email !== currentUser.email);
+
+  if (users.length === 0) {
+    noUsersEl.classList.add('show');
+    actionsEl.style.opacity = '0.3';
+    actionsEl.style.pointerEvents = 'none';
     return;
   }
 
-  // Render up to 3 cards, back-to-front so top card is last in DOM
+  if (deck.length === 0) {
+    emptyEl.classList.add('show');
+    actionsEl.style.opacity = '0.3';
+    actionsEl.style.pointerEvents = 'none';
+    return;
+  }
+
+  actionsEl.style.opacity = '';
+  actionsEl.style.pointerEvents = '';
+
   const visible = deck.slice(0, 3).reverse();
   visible.forEach(profile => stack.appendChild(buildCard(profile)));
 
@@ -148,8 +232,13 @@ function updateNotesUI() {
 }
 
 // ─── DRAG ────────────────────────────────────────────────────────────────────
+let isDragging = false;
+let startX = 0, currentX = 0;
+let activeCard = null;
+let topCardProfile = null;
+
 function attachDragHandlers() {
-  const card = document.querySelector('#stack .card:last-child');
+  const card = document.querySelector('#stack .card:first-child');
   if (!card) return;
   card.addEventListener('mousedown', onDragStart);
   card.addEventListener('touchstart', onDragStart, { passive: true });
@@ -158,7 +247,7 @@ function attachDragHandlers() {
 function onDragStart(e) {
   startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
   isDragging = true;
-  activeCard = document.querySelector('#stack .card:last-child');
+  activeCard = document.querySelector('#stack .card:first-child');
   activeCard.style.transition = 'none';
 
   document.addEventListener('mousemove', onDragMove);
@@ -208,7 +297,6 @@ function onDragEnd() {
   } else if (currentX < -100) {
     flyOut('left');
   } else {
-    // Snap back
     activeCard.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
     activeCard.style.transform = '';
     activeCard.querySelector('.indicator.like').style.opacity = 0;
@@ -234,26 +322,22 @@ function flyOut(direction) {
 
   setTimeout(() => {
     deck.shift();
-    state.deckIndex = profiles.length - deck.length;
-    saveState(state);
+    state.deckIndex++;
+    dbSaveState(currentUser.email, state);
     renderDeck();
   }, 400);
 }
 
-// Public: called by button onclick
 function swipeCard(direction) {
   if (deck.length === 0) return;
-  activeCard = document.querySelector('#stack .card:last-child');
+  activeCard = document.querySelector('#stack .card:first-child');
   if (!activeCard) return;
   flyOut(direction);
 }
 
 // ─── NOTE MODAL ──────────────────────────────────────────────────────────────
 function openNoteModal() {
-  if (state.notesLeft <= 0) {
-    showToast("Plus de notes disponibles aujourd'hui", 'error');
-    return;
-  }
+  if (state.notesLeft <= 0) { showToast("Plus de notes disponibles aujourd'hui", 'error'); return; }
   if (deck.length === 0) return;
 
   document.getElementById('modalName').textContent = `Note pour ${topCardProfile.name}`;
@@ -286,7 +370,7 @@ function sendNote() {
 
   state.notesLeft--;
   state.sentNotes.unshift(note);
-  saveState(state);
+  dbSaveState(currentUser.email, state);
 
   closeModal();
   showToast(`Note envoyée à ${note.to} 💌`, 'success');
@@ -303,7 +387,7 @@ function toggleNotesPanel() {
 
 function renderNotesList() {
   const list = document.getElementById('notesList');
-  if (state.sentNotes.length === 0) {
+  if (!state.sentNotes || state.sentNotes.length === 0) {
     list.innerHTML = '<div class="no-notes">Aucune note envoyée aujourd\'hui.</div>';
     return;
   }
@@ -333,5 +417,19 @@ document.getElementById('noteText').addEventListener('input', function () {
   document.getElementById('sendBtn').disabled = len < 2;
 });
 
+// Permettre Enter sur les champs login/register
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  if (!document.getElementById('authScreen').classList.contains('hidden')) {
+    if (!document.getElementById('loginForm').classList.contains('hidden')) doLogin();
+    else doRegister();
+  }
+});
+
 // ─── INIT ────────────────────────────────────────────────────────────────────
-renderDeck();
+const savedSession = dbGetSession();
+if (savedSession) {
+  const users = dbGetUsers();
+  const user = users.find(u => u.email === savedSession);
+  if (user) startApp(user);
+}
