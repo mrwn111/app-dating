@@ -1,0 +1,29 @@
+.DS_Store
+.env
+.env.local
+node_modules/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production
+*.min.js
+*.min.css
+
+# Temporary
+tmp/
+temp/

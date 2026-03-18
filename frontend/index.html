@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainRotMatch - L'app pour les vrais dégénérés</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>BrainRotMatch</span>
+                </div>
+                <div class="nav-buttons">
+                    <button id="loginBtn" class="btn btn-outline">Se connecter</button>
+                    <button id="signupBtn" class="btn btn-primary">S'inscrire</button>
+                </div>
+                <div id="userMenu" class="user-menu" style="display: none;">
+                    <div class="user-info">
+                        <span id="userDisplay"></span>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-small">Déconnexion</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="mainContent" class="main-content">
+            <!-- Landing Page -->
+            <section id="landingPage" class="page landing-page active">
+                <div class="landing-container">
+                    <div class="landing-content">
+                        <h1 class="landing-title">
+                            <i class="fas fa-brain"></i> BrainRotMatch
+                        </h1>
+                        <p class="landing-subtitle">L'app de rencontre pour les vrais brainrots</p>
+                        <p class="landing-description">
+                            Trouve ton âme sœur sur internet.<br>
+                            Oublie les normies. Embrace le chaos. 🎭
+                        </p>
+                        <div class="landing-buttons">
+                            <button id="landingSignupBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus"></i> Rejoins le chaos
+                            </button>
+                            <button id="landingLoginBtn" class="btn btn-outline btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> J'suis déjà là
+                            </button>
+                        </div>
+                    </div>
+                    <div class="landing-visual">
+                        <div class="floating-emoji">🧠</div>
+                        <div class="floating-emoji" style="--delay: 1s">💀</div>
+                        <div class="floating-emoji" style="--delay: 2s">🎭</div>
+                        <div class="floating-emoji" style="--delay: 3s">🔥</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Login Page -->
+            <section id="loginPage" class="page login-page">
+                <div class="form-container">
+                    <div class="form-card">
+                        <button class="close-btn" onclick="closePage('loginPage')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h2>Se connecter</h2>
+                        <form id="loginForm" class="auth-form">
+                            <div class="form-group">
+                                <label for="loginEmail">Email</label>
+                                <input 
+                                    type="email" 
+                                    id="loginEmail" 
+                                    name="email" 
+                                    placeholder="ton@email.com" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Mot de passe</label>
+                                <input 
+                                    type="password" 
+                                    id="loginPassword" 
+                                    name="password" 
+                                    placeholder="••••••••" 
+                                    required
+                                >
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                Me connecter
+                            </button>
+                        </form>
+                        <p class="form-link">
+                            Pas encore inscrit ? 
+                            <button onclick="switchPage('loginPage', 'signupPage')" class="link-btn">
+                                S'inscrire
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Signup Page -->
+            <section id="signupPage" class="page signup-page">
+                <div class="form-container">
+                    <div class="form-card">
+                        <button class="close-btn" onclick="closePage('signupPage')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h2>Rejoins le chaos</h2>
+                        <form id="signupForm" class="auth-form">
+                            <div class="form-group">
+                                <label for="signupUsername">Nom d'utilisateur</label>
+                                <input 
+                                    type="text" 
+                                    id="signupUsername" 
+                                    name="username" 
+                                    placeholder="ton_pseudo_chelou" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="signupEmail">Email</label>
+                                <input 
+                                    type="email" 
+                                    id="signupEmail" 
+                                    name="email" 
+                                    placeholder="ton@email.com" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="signupPassword">Mot de passe</label>
+                                <input 
+                                    type="password" 
+                                    id="signupPassword" 
+                                    name="password" 
+                                    placeholder="••••••••" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="signupConfirm">Confirmer le mot de passe</label>
+                                <input 
+                                    type="password" 
+                                    id="signupConfirm" 
+                                    name="confirm_password" 
+                                    placeholder="••••••••" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="signupAge">Âge</label>
+                                <input 
+                                    type="number" 
+                                    id="signupAge" 
+                                    name="age" 
+                                    placeholder="18" 
+                                    min="18" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="signupBio">Bio (dis-nous quelque chose de chelou)</label>
+                                <textarea 
+                                    id="signupBio" 
+                                    name="bio" 
+                                    placeholder="Je suis fan de memes sans sens et j'aime les animes..." 
+                                    rows="3"
+                                ></textarea>
+                            </div>
+                            <div class="checkbox-group">
+                                <input 
+                                    type="checkbox" 
+                                    id="brainrotCheck" 
+                                    name="is_brainrot" 
+                                    required
+                                >
+                                <label for="brainrotCheck" class="checkbox-label">
+                                    <i class="fas fa-check-circle"></i>
+                                    Je confirme que je suis un vrai brainrot 🧠💀
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                Créer mon compte
+                            </button>
+                        </form>
+                        <p class="form-link">
+                            Déjà inscrit ? 
+                            <button onclick="switchPage('signupPage', 'loginPage')" class="link-btn">
+                                Se connecter
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Swiping Page (Main App) -->
+            <section id="swipePage" class="page swipe-page" style="display: none;">
+                <div class="swipe-container">
+                    <!-- Profile Cards Stack -->
+                    <div class="cards-stack">
+                        <div class="profile-card">
+                            <div class="card-image">
+                                <div class="placeholder-image">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            </div>
+                            <div class="card-info">
+                                <h3>Charge les profils...</h3>
+                                <p>C'est en construction 🚀</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Swipe Controls -->
+                    <div class="swipe-controls">
+                        <button id="rejectBtn" class="control-btn reject-btn" title="Non merci">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button id="likeBtn" class="control-btn like-btn" title="Oh oui !">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Keyboard Hints -->
+                <div class="keyboard-hints">
+                    <span><kbd>← </kbd> ou clic left = Non</span>
+                    <span><kbd>→ </kbd> ou clic right = Oui</span>
+                </div>
+            </section>
+
+            <!-- Profile Page -->
+            <section id="profilePage" class="page profile-page" style="display: none;">
+                <div class="profile-container">
+                    <div class="profile-card-large">
+                        <div class="profile-header">
+                            <h2 id="profileName"></h2>
+                            <button class="close-btn" onclick="closePage('profilePage')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="profile-content">
+                            <div class="profile-image">
+                                <div class="placeholder-image">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="profile-info">
+                                <p id="profileAge"></p>
+                                <p id="profileBio"></p>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="goToSwipe()">
+                            Retour aux matches
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
