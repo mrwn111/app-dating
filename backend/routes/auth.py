@@ -8,18 +8,18 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     data = request.get_json()
 
-    # Vérification des champs obligatoires
     if not data or not data.get('email') or not data.get('password') or not data.get('username'):
         return jsonify({'error': 'Email, username et password sont requis'}), 400
 
-    # Vérif si email ou username déjà pris
     if User.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Cet email est déjà utilisé'}), 409
 
     if User.query.filter_by(username=data['username']).first():
         return jsonify({'error': 'Ce username est déjà pris'}), 409
 
-    # Création de l'utilisateur
+    tags_data = data.get('tags', [])
+    tags_str = ','.join(tags_data) if isinstance(tags_data, list) else (tags_data or '')
+
     user = User(
         username=data['username'],
         email=data['email'],
@@ -29,6 +29,8 @@ def register():
         gender=data.get('gender'),
         looking_for=data.get('looking_for'),
         location=data.get('location'),
+        bio=data.get('bio', ''),
+        tags=tags_str,
     )
     user.set_password(data['password'])
 

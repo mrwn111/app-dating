@@ -11,7 +11,8 @@ load_dotenv()
 def create_app(config_name='development'):
     app = Flask(__name__,
                 template_folder='../frontend/templates',
-                static_folder='../frontend/static')
+                static_folder='../frontend/static',
+                instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data'))
 
     env = os.getenv('FLASK_ENV', 'development')
     if env == 'production':
