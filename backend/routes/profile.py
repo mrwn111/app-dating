@@ -6,6 +6,9 @@ profile_bp = Blueprint('profile', __name__)
 @profile_bp.route('/update', methods=['PUT'])
 def update_profile():
     user_id = session.get('_user_id')
+    print(f"UPDATE PROFILE - user_id: {user_id}")
+    print(f"DATA: {request.get_json()}")
+
     if not user_id:
         return jsonify({'error': 'Non connecté'}), 401
 
@@ -16,6 +19,7 @@ def update_profile():
 
     if 'bio' in data:
         user.bio = data['bio']
+        print(f"BIO SAVED: {data['bio']}")
     if 'age' in data:
         user.age = data['age']
     if 'email' in data:
@@ -27,6 +31,7 @@ def update_profile():
         user.profile_photo = data['profile_photo']
 
     db.session.commit()
+    print(f"PROFILE UPDATED - bio: {user.bio}")
     return jsonify({'message': 'Profil mis à jour', 'user': user.to_dict()}), 200
 
 

@@ -136,7 +136,6 @@ async function startApp(user) {
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
 
-  // Recharge le profil frais depuis la DB
   try {
     const res = await fetch('/api/profile/me');
     const data = await res.json();
@@ -269,7 +268,7 @@ let activeCard = null;
 let topCardProfile = null;
 
 function attachDragHandlers() {
-  const card = document.querySelector('#stack .card:first-child');
+  const card = document.querySelector('#stack .card:last-child');
   if (!card) return;
   card.addEventListener('mousedown', onDragStart);
   card.addEventListener('touchstart', onDragStart, { passive: true });
@@ -278,7 +277,7 @@ function attachDragHandlers() {
 function onDragStart(e) {
   startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
   isDragging = true;
-  activeCard = document.querySelector('#stack .card:first-child');
+  activeCard = document.querySelector('#stack .card:last-child');
   activeCard.style.transition = 'none';
   document.addEventListener('mousemove', onDragMove);
   document.addEventListener('mouseup', onDragEnd);
@@ -360,7 +359,7 @@ function flyOut(direction) {
 
 function swipeCard(direction) {
   if (deck.length === 0) return;
-  activeCard = document.querySelector('#stack .card:first-child');
+  activeCard = document.querySelector('#stack .card:last-child');
   if (!activeCard) return;
   flyOut(direction);
 }
@@ -603,6 +602,7 @@ async function saveProfile() {
 
     showToast('Profil sauvegardé ✓', 'success');
     document.getElementById('profileSaveError').textContent = '';
+    await buildDeck();
     renderProfilePanel();
   } catch(e) {
     document.getElementById('profileSaveError').textContent = 'Impossible de contacter le serveur.';

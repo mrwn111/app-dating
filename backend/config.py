@@ -9,6 +9,8 @@ class Config:
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_HTTPONLY = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_DURATION = timedelta(days=30)
     WTF_CSRF_TIME_LIMIT = None
     JSON_SORT_KEYS = False
 
