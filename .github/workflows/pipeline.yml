@@ -109,4 +109,4 @@ jobs:
       - name: Vérifier que l'app démarre
         run: |
           cd backend
-          python -c "import app; print('✅ App importée avec succès')"
+          python -c "import app; print(' App importée avec succès')"
