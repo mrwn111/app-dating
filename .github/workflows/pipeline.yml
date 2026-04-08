@@ -9,10 +9,29 @@ on:
 
 jobs:
 
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      python: ${{ steps.filter.outputs.python }}
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Filtrer les fichiers modifiés
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            python:
+              - '**/*.py'
+              - 'backend/requirements.txt'
+
+
   secret-scan:
     name: Scan Secrets (Gitleaks)
     runs-on: ubuntu-latest
-
+    # Pas de dépendance → tourne toujours en parallèle avec detect-changes
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -25,11 +44,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
-
   lint:
     name: Lint Python (Flake8)
     runs-on: ubuntu-latest
-
+    needs: [detect-changes]
+    # Lab 5 — Ne tourne QUE si des fichiers Python ont changé
+    if: needs.detect-changes.outputs.python == 'true'
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -45,11 +65,12 @@ jobs:
       - name: Lancer Flake8
         run: flake8 backend/ --max-line-length=120 --exclude=__pycache__,.env,migrations --ignore=W292,W293 --statistics --count
 
-
   bandit:
     name: Sécurité Code (Bandit)
     runs-on: ubuntu-latest
-
+    needs: [detect-changes]
+    # Lab 5 — Ne tourne QUE si des fichiers Python ont changé
+    if: needs.detect-changes.outputs.python == 'true'
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -65,11 +86,12 @@ jobs:
       - name: Lancer Bandit
         run: bandit -r backend/ -ll -x backend/__pycache__
 
-
   pip-audit:
     name: Sécurité Dépendances (pip-audit)
     runs-on: ubuntu-latest
-
+    needs: [detect-changes]
+    # Lab 5 — Ne tourne QUE si des fichiers Python ont changé
+    if: needs.detect-changes.outputs.python == 'true'
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -89,8 +111,11 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    #  Lab 5 — Attend tous les jobs de test (needs)
     needs: [secret-scan, lint, bandit, pip-audit]
-
+    # always() + !failure() : continue si certains jobs ont été skippés (pas de .py modifié)
+    # mais bloque si l'un d'eux a réellement échoué
+    if: always() && !failure() && !cancelled()
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -104,15 +129,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+
       - name: Vérifier que l'app démarre
         run: |
           cd backend
-          python -c "import app; print('✅ App importée avec succès')"
+          python -c "import app; print('App importée avec succès')"
+
+
   docker:
     name: Docker — Build & Scan (Trivy)
     runs-on: ubuntu-latest
+    # Lab 5 — Ne builder l'image Docker QUE si les tests sont OK
     needs: [build]
-
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -142,12 +170,10 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM
           trivyignores: .trivyignore
 
-
   dast:
     name: DAST — Scan Runtime (Nikto)
     runs-on: ubuntu-latest
     needs: [docker]
-
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -161,20 +187,21 @@ jobs:
             --name mon-app-dast \
             -p 8000:8000 \
             mon-app:${{ github.sha }}
-          # Attendre que l'app soit prête
           echo "Attente du démarrage de l'application..."
           for i in $(seq 1 15); do
             if curl -sf http://localhost:8000/ > /dev/null 2>&1; then
-              echo "✅ Application prête"
+              echo "Application prête"
               break
             fi
             echo "Tentative $i/15..."
             sleep 2
           done
+
       - name: Installer Nikto
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y nikto
+
       - name: Lancer Nikto (DAST)
         run: |
           nikto -h http://localhost:8000 \
@@ -182,6 +209,7 @@ jobs:
             -Format txt \
             -Tuning 1234567890ab \
             -nointeractive || true
+
       - name: Afficher le rapport Nikto
         if: always()
         run: cat nikto-report.txt
@@ -204,7 +232,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [dast]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -223,6 +250,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-
             type=raw,value=latest
+
       - name: Build et Push vers DockerHub
         uses: docker/build-push-action@v5
         with:
@@ -230,4 +258,4 @@ jobs:
           file: backend/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}    #test
+          labels: ${{ steps.meta.outputs.labels }}
