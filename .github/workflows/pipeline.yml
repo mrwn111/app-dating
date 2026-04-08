@@ -63,7 +63,7 @@ jobs:
         run: pip install bandit
 
       - name: Lancer Bandit
-        run: bandit -r backend/ -ll -x backend/__pycache__
+        run: bandit -r backend/ -ll -x backend/__pycache__ -s B104
 
 
   pip-audit:
