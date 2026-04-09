@@ -46,22 +46,22 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
 
   # ────────────────────────────────────────────────
-  secret-scan-trufflehog:
-    name: Scan Secrets (TruffleHog — alternative)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+secret-scan-trufflehog:
+  name: Scan Secrets (TruffleHog — alternative)
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Scan avec TruffleHog
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --only-verified
+    - name: Scan avec TruffleHog
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.before }}
+        head: ${{ github.sha }}
+        extra_args: --only-verified
 
   # ────────────────────────────────────────────────
   lint:
