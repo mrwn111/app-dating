@@ -9,7 +9,6 @@ on:
 
 jobs:
 
-  # ────────────────────────────────────────────────
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
@@ -28,7 +27,6 @@ jobs:
               - '**/*.py'
               - 'backend/requirements.txt'
 
-  # ────────────────────────────────────────────────
   secret-scan:
     name: Scan Secrets (Gitleaks + règle custom)
     runs-on: ubuntu-latest
@@ -45,25 +43,23 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
           GITLEAKS_CONFIG: .gitleaks.toml
 
-  # ────────────────────────────────────────────────
-secret-scan-trufflehog:
-  name: Scan Secrets (TruffleHog — alternative)
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout du code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+  secret-scan-trufflehog:
+    name: Scan Secrets (TruffleHog — alternative)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Scan avec TruffleHog
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        base: ${{ github.event.before }}
-        head: ${{ github.sha }}
-        extra_args: --only-verified
+      - name: Scan avec TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.before }}
+          head: ${{ github.sha }}
+          extra_args: --only-verified
 
-  # ────────────────────────────────────────────────
   lint:
     name: Lint Python (Flake8)
     runs-on: ubuntu-latest
@@ -84,7 +80,6 @@ secret-scan-trufflehog:
       - name: Lancer Flake8
         run: flake8 backend/ --max-line-length=120 --exclude=__pycache__,.env,migrations --ignore=W292,W293,W504 --statistics --count
 
-  # ────────────────────────────────────────────────
   bandit:
     name: Sécurité Code (Bandit)
     runs-on: ubuntu-latest
@@ -105,7 +100,6 @@ secret-scan-trufflehog:
       - name: Lancer Bandit
         run: bandit -r backend/ -ll -x backend/__pycache__ -s B104
 
-  # ────────────────────────────────────────────────
   pip-audit:
     name: Sécurité Dépendances (pip-audit)
     runs-on: ubuntu-latest
@@ -126,7 +120,6 @@ secret-scan-trufflehog:
       - name: Lancer pip-audit
         run: pip-audit -r backend/requirements.txt
 
-  # ────────────────────────────────────────────────
   build:
     name: Build (python)
     runs-on: ubuntu-latest
@@ -151,7 +144,6 @@ secret-scan-trufflehog:
           cd backend
           python -c "import app; print('App importée avec succès')"
 
-  # ────────────────────────────────────────────────
   docker:
     name: Docker — Build & Scan (Trivy)
     runs-on: ubuntu-latest
@@ -185,7 +177,6 @@ secret-scan-trufflehog:
           severity: CRITICAL,HIGH,MEDIUM
           trivyignores: .trivyignore
 
-  # ────────────────────────────────────────────────
   dast:
     name: DAST — Scan Runtime (Nikto)
     runs-on: ubuntu-latest
@@ -242,7 +233,6 @@ secret-scan-trufflehog:
         if: always()
         run: docker stop mon-app-dast && docker rm mon-app-dast
 
-  # ────────────────────────────────────────────────
   push-dockerhub:
     name: Push DockerHub
     runs-on: ubuntu-latest
