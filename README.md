@@ -25,6 +25,15 @@ Notre approche met l'accent sur la protection des données et la robustesse du c
 
 ## 🛠️ Patchnote 
 
+#### Frontend :
+
+
+#### Backend :
+
+
+#### Pipeline : 
+
+
 
 
 
