@@ -12,7 +12,7 @@ jobs:
 
   detect-changes:
     name: Detect Changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       python: ${{ steps.filter.outputs.python }}
     steps:
@@ -31,7 +31,7 @@ jobs:
 
   secret-scan:
     name: Scan Secrets (Gitleaks + règle custom)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
 
   secret-scan-trufflehog:
     name: Scan Secrets (TruffleHog — alternative)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
 
   lint:
     name: Lint Python (Flake8)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     if: needs.detect-changes.outputs.python == 'true'
     steps:
@@ -84,7 +84,7 @@ jobs:
 
   bandit:
     name: Sécurité Code (Bandit)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     if: needs.detect-changes.outputs.python == 'true'
     steps:
@@ -104,7 +104,7 @@ jobs:
 
   semgrep:
     name: Sécurité Code (Semgrep)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     if: needs.detect-changes.outputs.python == 'true'
     steps:
@@ -147,7 +147,7 @@ jobs:
 
   pip-audit:
     name: Sécurité Dépendances (pip-audit)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [detect-changes]
     if: needs.detect-changes.outputs.python == 'true'
     steps:
@@ -168,7 +168,7 @@ jobs:
 
   build:
     name: Build (Python)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [secret-scan, secret-scan-trufflehog, lint, bandit, semgrep, pip-audit]
     if: always() && !failure() && !cancelled()
     steps:
@@ -193,7 +193,7 @@ jobs:
 
   trivy-pre-build:
     name: Scan Pré-Build (Trivy FS + Config)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build]
     steps:
       - name: Checkout du code
@@ -222,7 +222,7 @@ jobs:
 
   docker:
     name: Docker — Build Multi-Stage Distroless & Scan Post-Build (Trivy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [trivy-pre-build]
     steps:
       - name: Checkout du code
@@ -251,7 +251,7 @@ jobs:
 
   dast:
     name: DAST — Scan Runtime (Nikto)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [docker]
     steps:
       - name: Checkout du code
@@ -308,7 +308,7 @@ jobs:
 
   push-dockerhub:
     name: Push DockerHub
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [dast]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
