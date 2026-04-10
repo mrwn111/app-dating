@@ -1,3 +1,38 @@
+<div align="center">
+
+<img src="https://via.placeholder.com/200" alt="Logo du projet" width="200"/>
+
+# Nom de ton Projet
+
+**Une courte phrase qui décrit ton projet (le slogan).**
+
+[![GitHub stars](https://img.shields.io/github/stars/TON_UTILISATEUR/TON_REPO?style=for-the-badge)](https://github.com/TON_UTILISATEUR/TON_REPO/stargazers)
+[![GitHub release](https://img.shields.io/github/v/release/TON_UTILISATEUR/TON_REPO?style=for-the-badge)](https://github.com/TON_UTILISATEUR/TON_REPO/releases)
+[![License](https://img.shields.io/github/license/TON_UTILISATEUR/TON_REPO?style=for-the-badge)](https://github.com/TON_UTILISATEUR/TON_REPO/blob/main/LICENSE)
+[![CI Build](https://img.shields.io/github/actions/workflow/status/TON_UTILISATEUR/TON_REPO/main.yml?style=for-the-badge&label=CI%20BUILD)](https://github.com/TON_UTILISATEUR/TON_REPO/actions)
+
+</div>
+
+<br />
+
+## ℹ️ À propos (About)
+
+[Nom de ton projet] est un outil/logiciel qui permet de [décrire la fonction principale]. Offrant [mentionner un ou deux points forts, ex: une faible latence, une grande flexibilité] avec le support de [mentionner les technologies ou langages principaux]. 
+
+Vous pouvez vous connecter à [Nom de ton projet] depuis [mentionner les clients/appareils compatibles]. Une interface [web / ligne de commande / graphique] est fournie pour permettre la configuration facilement.
+
+
+
+
+
 ## Spark - Application Web de Rencontre
 
 ** 16/03 - 10/04 **
+
+
+  A PROPOS
+
+Spark est une application de rencontre, ayant été creer dans le cadre d'un projet de DevSecOps.
+L'objectif est de proposer une solution de rencontre simple et sécurisé OpenSource. 
+
+
