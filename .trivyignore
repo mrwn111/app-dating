@@ -3,3 +3,6 @@
 # et ne peuvent pas être mises à jour directement
 CVE-2026-23949
 CVE-2026-24049
+
+# Faux secrets de démonstration — non réels, à ignorer
+fake_secret_demo.py
