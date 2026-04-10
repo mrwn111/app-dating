@@ -17,7 +17,7 @@
 
 <br />
 
-## ℹ️ À propos (About)
+## ℹ️ À propos 
 
 Spark est une application de rencontre développée dans le cadre d'un projet de DevSecOps. L'objectif principal est de proposer une solution de rencontre simple, OpenSource et sécurisée.
 
