@@ -25,13 +25,34 @@ Notre approche met l'accent sur la protection des données et la robustesse du c
 
 ## 🛠️ Patchnote 
 
-#### Frontend :
 
+### 🖥️ Frontend
 
-#### Backend :
+- **Mauvais profil affiché dans l'animation de swipe** : le toast "tu as liké..." affichait le profil derrière la carte visible et non celui du dessus.
+  **Fix** : capture locale de `topCardProfile` au moment exact du swipe dans `flyOut()`.
 
+- **Ordre des cartes inversé dans le stack** : la carte du dessus n'était pas correctement identifiée par le CSS.
+  **Fix** : `renderDeck()` insère désormais `deck[2]` en premier et `deck[0]` en dernier (`last-child`) pour donner le bon `z-index` à la carte active.
 
-#### Pipeline : 
+- **Drag attaché à la mauvaise carte** : le handler `onDragStart` ne re-sélectionnait pas le bon élément au moment du drag.
+  **Fix** : re-sélection explicite du `last-child` dans `onDragStart`.
+
+---
+
+### ⚙️ Backend
+
+- **Match non affiché mutuellement** : quand l'utilisateur A likait B, le match n'apparaissait pas dans la fenêtre "Matches" du compte de B.
+  **Fix** : correction de la route `/api/matches/like` pour créer l'entrée match dans les deux sens en base de données.
+
+---
+
+### 🔧 Pipeline CI/CD
+
+- **TruffleHog — BASE et HEAD identiques** : TruffleHog échouait sur les push directs sur `main`.
+  **Fix** : remplacement de `base: default_branch` par `base: ${{ github.event.before }}`.
+
+- **Trivy — Faux positif JWT dans `fake_secret_demo.py`** : Trivy détectait le JWT de démonstration et faisait échouer le scan pré-build.
+  **Fix** : ajout de `fake_secret_demo.py` dans `.trivyignore`.
 
 
 
