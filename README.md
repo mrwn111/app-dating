@@ -48,10 +48,10 @@ Notre approche met l'accent sur la protection des données et la robustesse du c
 
 ### 🔧 Pipeline CI/CD
 
-- **TruffleHog — BASE et HEAD identiques** : TruffleHog échouait sur les push directs sur `main`.
+- **TruffleHog - BASE et HEAD identiques** : TruffleHog échouait sur les push directs sur `main`.
   **Fix** : remplacement de `base: default_branch` par `base: ${{ github.event.before }}`.
 
-- **Trivy — Faux positif JWT dans `fake_secret_demo.py`** : Trivy détectait le JWT de démonstration et faisait échouer le scan pré-build.
+- **Trivy - Faux positif JWT dans `fake_secret_demo.py`** : Trivy détectait le JWT de démonstration et faisait échouer le scan pré-build.
   **Fix** : ajout de `fake_secret_demo.py` dans `.trivyignore`.
 
 
