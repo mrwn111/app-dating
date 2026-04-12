@@ -59,10 +59,24 @@ Notre approche met l'accent sur la protection des données et la robustesse du c
 
 ## 📦 Guide d'installation
 
-Si vous souhaitez tester l'application sans configurer l'environnement de développement, vous pouvez utiliser les images pré-construites sur Docker Hub.
+L'application est disponible sur Docker Hub sous le nom `nblsc/mon-app`.
+***Note sur le port** : Par défaut, l'application tourne sur le port 5000 à l'intérieur du conteneur. Si ce port est déjà utilisé sur votre machine, utilisez un autre port disponible comme le 8080 par exemple.*
 
-**Méthode 1 :** Terminal (ligne de commande)
-Lancez l'application sur le port de votre choix
+**Méthode 1 :** Terminal (Ligne de Commande)
+Exécutez cette commande pour lancer l'application instantanément :
+```
+docker run -d -p 8080:5000 --name spark-app nblsc/mon-app:latest
+```
+L'application sera alors accessible à l'adresse suivante : `http://localhost:8080` ( remplacez 8080 par le port que vous avez décidé d'utiliser)
 
+**Méthode 2 :** Docker Desktop (Interface Graphique)
+Dans la barre de recherche en haut, tapez `nblsc/mon-app` et cliquez sur Pull.
 
+Allez dans l'onglet Images et cliquez sur Run sur l'image `nblsc/mon-app`.
 
+Ouvrez le menu Optional settings : 
+- Host Port : Entrez le port de votre choix (ex: 8080).
+- Container Name : Donnez un nom (ex: spark-app).
+
+Cliquez sur Run.
+L'application sera alors accessible à l'adresse suivante : `http://localhost:8080` ( remplacez 8080 par le port que vous avez décidé d'utiliser)
